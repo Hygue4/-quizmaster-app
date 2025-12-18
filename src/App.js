@@ -1,22 +1,25 @@
 import React from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import Login from './pages/Login';
+import Home from './pages/Home';
 import './App.css';
-import Button from './components/Button';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🏆 QuizMaster</h1>
-        <p>Test your knowledge across multiple topics!</p>
-        <div style={{ marginTop: '20px' }}>
-          <Button variant="primary">Start Quiz</Button>
-        </div>
-        <div style={{ marginTop: '20px', fontSize: '14px', color: '#888' }}>
-          <p>✅ Week 1: Design & Setup Complete</p>
-          <p>🚧 Week 2: Development In Progress</p>
-        </div>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Home />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
