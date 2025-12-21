@@ -115,10 +115,10 @@ npm start
 - [x] GitHub repository setup
 - [x] React project initialization
 - [x] Folder structure created
-- [ ] Component development (In Progress)
-- [ ] Quiz logic implementation
-- [ ] Routing setup
-- [ ] Styling
+- [x] Component development 
+- [x] Quiz logic implementation
+- [x] Routing setup
+- [x] Styling
 - [ ] Deployment
 
 ## 👤 Author
@@ -140,4 +140,4 @@ This project is part of the ALX Software Engineering Capstone Project.
 
 ---
 
-**Status**: 🚧 Work in Progress | **Week**: 1/3 Complete
+**Status**: 🚧 Work in Progress | **Week**: 2/3 Complete
