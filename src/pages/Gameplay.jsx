@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Gameplay.css';
 
@@ -14,89 +20,118 @@ const Gameplay = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Fallback questions - Categorized
-  const fallbackQuestions = [
-    {
-      id: 1,
-      question: 'What is the capital of France?',
-      options: ['London', 'Berlin', 'Paris', 'Madrid'],
-      correctAnswer: 'Paris',
-    },
-    {
-      id: 2,
-      question: 'Which planet is known as the Red Planet?',
-      options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
-      correctAnswer: 'Mars',
-    },
-    {
-      id: 3,
-      question: 'What is the chemical formula for water?',
-      options: ['H2O', 'CO2', 'O2', 'NaCl'],
-      correctAnswer: 'H2O',
-    },
-    {
-      id: 4,
-      question: 'In which year did World War II end?',
-      options: ['1943', '1944', '1945', '1946'],
-      correctAnswer: '1945',
-    },
-    {
-      id: 5,
-      question: 'What is the largest ocean on Earth?',
-      options: [
-        'Atlantic Ocean',
-        'Indian Ocean',
-        'Arctic Ocean',
-        'Pacific Ocean',
-      ],
-      correctAnswer: 'Pacific Ocean',
-    },
-    {
-      id: 6,
-      question: 'How many continents are there?',
-      options: ['5', '6', '7', '8'],
-      correctAnswer: '7',
-    },
-    {
-      id: 7,
-      question: 'Who painted the Mona Lisa?',
-      options: [
-        'Vincent van Gogh',
-        'Pablo Picasso',
-        'Leonardo da Vinci',
-        'Michelangelo',
-      ],
-      correctAnswer: 'Leonardo da Vinci',
-    },
-    {
-      id: 8,
-      question: 'What is the speed of light?',
-      options: [
-        '299,792 km/s',
-        '150,000 km/s',
-        '500,000 km/s',
-        '1,000,000 km/s',
-      ],
-      correctAnswer: '299,792 km/s',
-    },
-    {
-      id: 9,
-      question: "Who wrote 'Romeo and Juliet'?",
-      options: [
-        'Charles Dickens',
-        'Jane Austen',
-        'William Shakespeare',
-        'Mark Twain',
-      ],
-      correctAnswer: 'William Shakespeare',
-    },
-    {
-      id: 10,
-      question: 'What is the square root of 64?',
-      options: ['6', '7', '8', '9'],
-      correctAnswer: '8',
-    },
-  ];
+  // Fallback questions - Wrapped in useMemo to prevent recreation on every render
+  const fallbackQuestions = useMemo(
+    () => [
+      {
+        id: 1,
+        question: 'What is the capital of France?',
+        options: ['London', 'Berlin', 'Paris', 'Madrid'],
+        correctAnswer: 'Paris',
+      },
+      {
+        id: 2,
+        question: 'Which planet is known as the Red Planet?',
+        options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
+        correctAnswer: 'Mars',
+      },
+      {
+        id: 3,
+        question: 'What is the chemical formula for water?',
+        options: ['H2O', 'CO2', 'O2', 'NaCl'],
+        correctAnswer: 'H2O',
+      },
+      {
+        id: 4,
+        question: 'In which year did World War II end?',
+        options: ['1943', '1944', '1945', '1946'],
+        correctAnswer: '1945',
+      },
+      {
+        id: 5,
+        question: 'What is the largest ocean on Earth?',
+        options: [
+          'Atlantic Ocean',
+          'Indian Ocean',
+          'Arctic Ocean',
+          'Pacific Ocean',
+        ],
+        correctAnswer: 'Pacific Ocean',
+      },
+      {
+        id: 6,
+        question: 'How many continents are there?',
+        options: ['5', '6', '7', '8'],
+        correctAnswer: '7',
+      },
+      {
+        id: 7,
+        question: 'Who painted the Mona Lisa?',
+        options: [
+          'Vincent van Gogh',
+          'Pablo Picasso',
+          'Leonardo da Vinci',
+          'Michelangelo',
+        ],
+        correctAnswer: 'Leonardo da Vinci',
+      },
+      {
+        id: 8,
+        question: 'What is the speed of light?',
+        options: [
+          '299,792 km/s',
+          '150,000 km/s',
+          '500,000 km/s',
+          '1,000,000 km/s',
+        ],
+        correctAnswer: '299,792 km/s',
+      },
+      {
+        id: 9,
+        question: "Who wrote 'Romeo and Juliet'?",
+        options: [
+          'Charles Dickens',
+          'Jane Austen',
+          'William Shakespeare',
+          'Mark Twain',
+        ],
+        correctAnswer: 'William Shakespeare',
+      },
+      {
+        id: 10,
+        question: 'What is the square root of 64?',
+        options: ['6', '7', '8', '9'],
+        correctAnswer: '8',
+      },
+    ],
+    [],
+  ); // Empty dependency array means this is created only once
+
+  // handleNext wrapped in useCallback to prevent re-creation on every render
+  const handleNext = useCallback(() => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer(null);
+      setIsAnswered(false);
+      setTimer(30);
+    } else {
+      const finalScore =
+        score +
+        (selectedAnswer === questions[currentQuestion]?.correctAnswer ? 1 : 0);
+      const settingsStr = localStorage.getItem('quizSettings');
+      const settings = settingsStr ? JSON.parse(settingsStr) : {};
+
+      const results = {
+        totalQuestions: questions.length,
+        correctAnswers: finalScore,
+        wrongAnswers: questions.length - finalScore,
+        category: settings.category?.name || 'Quiz',
+        difficulty: settings.difficulty || 'medium',
+      };
+      localStorage.setItem('quizResults', JSON.stringify(results));
+      navigate('/results');
+    }
+  }, [currentQuestion, questions, score, selectedAnswer, navigate]);
 
   // Fetch questions from Open Trivia DB API
   useEffect(() => {
@@ -198,11 +233,11 @@ const Gameplay = () => {
 
         console.log(
           '✅ ✅ ✅ SUCCESS! Formatted questions:',
-          formattedQuestions.length
+          formattedQuestions.length,
         );
         console.log(
           '✅ First question API category:',
-          formattedQuestions[0]?.apiCategory
+          formattedQuestions[0]?.apiCategory,
         );
         console.log('✅ First question:', formattedQuestions[0]?.question);
 
@@ -223,7 +258,7 @@ const Gameplay = () => {
     };
 
     fetchQuestions();
-  }, []); // Empty dependency array - runs once
+  }, [fallbackQuestions]); // fallbackQuestions is now stable thanks to useMemo
 
   // Timer countdown
   useEffect(() => {
@@ -233,7 +268,7 @@ const Gameplay = () => {
     } else if (timer === 0 && !isAnswered && questions.length > 0) {
       handleNext();
     }
-  }, [timer, isAnswered, loading, questions.length]);
+  }, [timer, isAnswered, loading, questions.length, handleNext]);
 
   const handleAnswerClick = (answer) => {
     if (isAnswered) return;
@@ -241,31 +276,6 @@ const Gameplay = () => {
     setIsAnswered(true);
     if (answer === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-      setTimer(30);
-    } else {
-      const finalScore =
-        score +
-        (selectedAnswer === questions[currentQuestion]?.correctAnswer ? 1 : 0);
-      const settingsStr = localStorage.getItem('quizSettings');
-      const settings = settingsStr ? JSON.parse(settingsStr) : {};
-
-      const results = {
-        totalQuestions: questions.length,
-        correctAnswers: finalScore,
-        wrongAnswers: questions.length - finalScore,
-        category: settings.category?.name || 'Quiz',
-        difficulty: settings.difficulty || 'medium',
-      };
-      localStorage.setItem('quizResults', JSON.stringify(results));
-      navigate('/results');
     }
   };
 

@@ -24,7 +24,7 @@ const Results = () => {
       gamesPlayed: (user.gamesPlayed || 0) + 1,
     };
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-  }, []);
+  }, [pointsEarned, user]); // Added pointsEarned and user to dependency array
 
   return (
     <div className="results-container">

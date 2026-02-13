@@ -4,7 +4,7 @@ import '../styles/Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+  // Removed unused 'user' variable - it was never used in the component
 
   return (
     <div className="home-container">
